@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 public class EngineServiceImpl implements EngineService {
 
   private static final String DELIMITER = " - ";
-  private static final String COMMENT_REGEX = "#*";
+  private static final String COMMENT_REGEX = "#";
 
   private final AdventurerService adventurerService;
   private final TreasureMapService treasureMapService;
@@ -26,7 +26,8 @@ public class EngineServiceImpl implements EngineService {
   public List<String> runMap(List<String> rows) {
     TreasureMap treasureMap = null;
     for (String rowString : rows) {
-      List<String> row = List.of(rowString.trim().split(DELIMITER));
+      rowString = rowString.trim();
+      List<String> row = List.of(rowString.split(DELIMITER));
       if (TreasureMap.getPattern().matcher(rowString).find()) {
         if (treasureMap != null) {
           throw new IllegalArgumentException("Parsing error : more than 1 map");
@@ -43,8 +44,8 @@ public class EngineServiceImpl implements EngineService {
         Adventurer adventurer = new Adventurer().build(row);
         treasureMapService.addAdventurerToMap(treasureMap, adventurer);
         adventurerService.computeMoves(adventurer, treasureMap);
-      } else if (!Pattern.compile(COMMENT_REGEX).matcher(rowString).find()) {
-        throw new IllegalArgumentException("Fail to parse the map");
+      } else if (!rowString.startsWith(COMMENT_REGEX)) {
+        throw new IllegalArgumentException("Fail to parse the map with line " + rowString);
       }
     }
     return treasureMapService.exportMapToString(treasureMap);

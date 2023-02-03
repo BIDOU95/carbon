@@ -1,5 +1,6 @@
 package org.example.lacarteauxtresors;
 
+import org.example.lacarteauxtresors.exception.ExportMapException;
 import org.example.lacarteauxtresors.exception.NumberArgumentException;
 import org.example.lacarteauxtresors.service.AdventurerService;
 import org.example.lacarteauxtresors.service.AdventurerServiceImpl;
@@ -13,7 +14,7 @@ import java.util.List;
 
 public class Application {
 
-  public static void main(String[] args) throws NumberArgumentException {
+  public static void main(String[] args) throws NumberArgumentException, ExportMapException {
     if (args.length < 2) {
       throw new NumberArgumentException("Invalid number of argument");
     }

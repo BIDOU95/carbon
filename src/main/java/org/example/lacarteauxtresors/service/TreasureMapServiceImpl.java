@@ -13,17 +13,15 @@ public class TreasureMapServiceImpl implements TreasureMapService {
 
   @Override
   public void addAdventurerToMap(TreasureMap map, Adventurer adventurer) {
-    if (adventurer.getPosX() > map.getSizeX()
-        || adventurer.getPosX() == 0
-        || adventurer.getPosY() > map.getSizeY()
-        || adventurer.getPosY() == 0) {
-      throw new IllegalArgumentException("Out of range coordinates");
-    }
+    checkCoordinates(adventurer.getPosX(), adventurer.getPosY(),map);
     Case newCaseItem = getCaseAt(map, adventurer.getPosX(), adventurer.getPosY());
     if (newCaseItem != null && newCaseItem.canVisit(adventurer)) {
       newCaseItem.visit(adventurer);
     } else if (newCaseItem != null) {
       throw new IllegalArgumentException("Case is not free");
+    }
+    if (map.getAdventurers().stream().anyMatch(otherAdventurer -> otherAdventurer.getPosX() == adventurer.getPosX() && otherAdventurer.getPosY() == adventurer.getPosY())) {
+      throw new IllegalArgumentException("An adventurer is already on the case");
     }
     map.getAdventurers().add(adventurer);
   }
@@ -46,6 +44,7 @@ public class TreasureMapServiceImpl implements TreasureMapService {
 
   @Override
   public void addCaseToMap(TreasureMap treasureMap, Case newCase) {
+    checkCoordinates(newCase.getPosX(), newCase.getPosY(),treasureMap);
     if (getCaseAt(treasureMap, newCase.getPosX(), newCase.getPosY()) != null) {
       throw new IllegalArgumentException(
           "Case already taken for coordinates x : "
@@ -53,6 +52,9 @@ public class TreasureMapServiceImpl implements TreasureMapService {
               + " / "
               + "y : "
               + newCase.getPosY());
+    }
+    if (!treasureMap.getAdventurers().isEmpty()) {
+      throw new IllegalArgumentException("Cannot add case after adventurer");
     }
     treasureMap.getCases().add(newCase);
   }
@@ -74,6 +76,9 @@ public class TreasureMapServiceImpl implements TreasureMapService {
 
   @Override
   public List<String> exportMapToString(TreasureMap map) {
+    if (map == null) {
+      return List.of();
+    }
     List<String> resultRows = new ArrayList<>();
     resultRows.add(map.buildRow());
     resultRows.addAll(
@@ -84,5 +89,14 @@ public class TreasureMapServiceImpl implements TreasureMapService {
     resultRows.addAll(
         map.getAdventurers().stream().map(Adventurer::buildRow).collect(Collectors.toList()));
     return resultRows;
+  }
+
+  private void checkCoordinates(int posX, int posY, TreasureMap map) {
+    if (posX > map.getSizeX()
+            || posX < 0
+            || posY > map.getSizeY()
+            || posY < 0) {
+      throw new IllegalArgumentException("Out of range coordinates");
+    }
   }
 }

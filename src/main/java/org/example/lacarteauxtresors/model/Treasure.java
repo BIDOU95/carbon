@@ -48,4 +48,8 @@ public class Treasure extends Case<Treasure> {
     }
     return null;
   }
+
+  public int getNumberOfTreasure() {
+    return numberOfTreasure;
+  }
 }
